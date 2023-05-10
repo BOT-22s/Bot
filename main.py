@@ -13,8 +13,7 @@ async def on_ready():
 
 @bot.event
 async def on_member_join(member):
-    await member.create_dm()
-    await member.dm_channel.send(f'Hi {member.name}, welcome to our Discord server!')
+    await member.guild.system_channel.send(f'Welcome {member.mention} to our server!')
 
 @bot.command()
 @commands.has_permissions(ban_members=True)
@@ -22,6 +21,15 @@ async def ban(ctx, member : discord.Member, *, reason=None):
     try:
         await member.ban(reason=reason)
         await ctx.send(f'Banned {member.mention}')
+    except Exception as e:
+        await ctx.send(str(e))
+
+@bot.command()
+@commands.has_permissions(kick_members=True)
+async def kick(ctx, member : discord.Member, *, reason=None):
+    try:
+        await member.kick(reason=reason)
+        await ctx.send(f'Kicked {member.mention}')
     except Exception as e:
         await ctx.send(str(e))
 
@@ -68,5 +76,23 @@ async def userinfo(ctx, member: discord.Member = None):
         await ctx.send(embed=embed)
     except Exception as e:
         await ctx.send(str(e))
+
+@bot.event
+async def on_message(message):
+    if message.author == bot.user:
+        return
+    if message.content == 'hello bot':
+        response = "Hi there!"
+        await message.channel.send(response)
+    await
+    bot.process_commands(message)
+
+@bot.command()
+async def poll(ctx, *, question):
+    embed = discord.Embed(title="A new poll has been created!", description=f"{question}", color=discord.Color.dark_teal())
+    embed.set_footer(text=f"Poll created by: {ctx.author.display_name}")
+    message = await ctx.send(embed=embed)
+    await message.add_reaction('👍')
+    await message.add_reaction('👎')
 
 bot.run(os.environ["DISCORD_TOKEN"])
