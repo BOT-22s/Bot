@@ -85,7 +85,8 @@ async def on_message(message):
         response = "Hi there!"
         await message.channel.send(response)
     await
-    bot.process_commands(message)
+  
+  bot.process_commands(message)
 
 @bot.command()
 async def poll(ctx, *, question):
