@@ -3,8 +3,7 @@ import discord
 import datetime
 from discord.ext import commands
 
-intents = discord.Intents.default()
-intents.message_content = True
+intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 @bot.event
@@ -27,6 +26,10 @@ async def ban(ctx, member : discord.Member, *, reason=None):
         await ctx.send(str(e))
 
 @bot.command()
+async def testban(ctx):
+    await ctx.send("To ban a user, type: `!ban @username [reason]`. Replace `@username` with the user's username and `[reason]` with the reason for the ban.")
+
+@bot.command()
 async def ping(ctx):
     await ctx.send('pong')
 
@@ -40,9 +43,8 @@ async def info(ctx):
         embed = discord.Embed(title=f"{ctx.guild.name}", description="Lorem Ipsum asdasd", timestamp=datetime.datetime.utcnow(), color=discord.Color.blue())
         embed.add_field(name="Server created at", value=f"{ctx.guild.created_at}")
         embed.add_field(name="Server Owner", value=f"{ctx.guild.owner}")
-        embed.add_field(name="Server Region", value=f"{ctx.guild.region}")
         embed.add_field(name="Server ID", value=f"{ctx.guild.id}")
-        embed.set_thumbnail(url=f"{ctx.guild.icon_url}")
+        embed.set_thumbnail(url=f"{ctx.guild.icon.url}")
         await ctx.send(embed=embed)
     except Exception as e:
         await ctx.send(str(e))
@@ -62,7 +64,7 @@ async def userinfo(ctx, member: discord.Member = None):
         embed.add_field(name="Nickname", value=f"{member.nick}", inline=True)
         embed.add_field(name="Created at", value=f"{member.created_at.strftime('%a, %#d %B %Y, %I:%M %p UTC')}", inline=False)
         embed.add_field(name="Joined at", value=f"{member.joined_at.strftime('%a, %#d %B %Y, %I:%M %p UTC')}", inline=False)
-        embed.set_thumbnail(url=f"{member.avatar_url}")
+        embed.set_thumbnail(url=f"{member.display_avatar.url}")
         await ctx.send(embed=embed)
     except Exception as e:
         await ctx.send(str(e))
