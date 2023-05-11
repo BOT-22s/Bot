@@ -84,9 +84,8 @@ async def on_message(message):
     if message.content == 'hello bot':
         response = "Hi there!"
         await message.channel.send(response)
-    await
-  
-  bot.process_commands(message)
+    await 
+        bot.process_commands(message)
 
 @bot.command()
 async def poll(ctx, *, question):
@@ -97,3 +96,4 @@ async def poll(ctx, *, question):
     await message.add_reaction('👎')
 
 bot.run(os.environ["DISCORD_TOKEN"])
+
