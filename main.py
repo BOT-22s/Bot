@@ -81,13 +81,12 @@ async def userinfo(ctx, member: discord.Member = None):
 async def on_message(message):
     if message.author == bot.user:
         return
-
     if message.content == 'hello bot':
         response = "Hi there!"
         await message.channel.send(response)
     await bot.process_commands(message)
 
-    @bot.command()
+@bot.command()
 async def poll(ctx, *, question):
     embed = discord.Embed(title="A new poll has been created!", description=f"{question}", color=discord.Color.dark_teal())
     embed.set_footer(text=f"Poll created by: {ctx.author.display_name}")
@@ -95,4 +94,5 @@ async def poll(ctx, *, question):
     await message.add_reaction('👍')
     await message.add_reaction('👎')
 
-    bot.run(os.environ["DISCORD_TOKEN"])
+bot.run(os.environ["DISCORD_TOKEN"])
+
