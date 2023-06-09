@@ -147,6 +147,13 @@ async def on_command_error(ctx, error):
             color=discord.Color.red()
         )
         await ctx.send(embed=embed)
+    elif isinstance(error, discord.HTTPException):
+        embed = discord.Embed(
+            title="Rate Limit Exceeded",
+            description="Oops! We are being rate-limited. Please try again later.",
+            color=discord.Color.red()
+        )
+        await ctx.send(embed=embed)
     else:
         embed = discord.Embed(
             title="Error",
@@ -199,20 +206,6 @@ async def poll(ctx, *, question):
     message = await ctx.send(embed=embed)
     await message.add_reaction('👍')
     await message.add_reaction('👎')
-
-    def check(reaction, user):
-        return user == ctx.author and reaction.message.id == message.id
-
-    try:
-        reaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=check)
-        if str(reaction.emoji) == '👍':
-            await ctx.send("You voted thumbs up! 👍")
-        elif str(reaction.emoji) == '👎':
-            await ctx.send("You voted thumbs down! 👎")
-        else:
-            await ctx.send("Invalid reaction.")
-    except asyncio.TimeoutError:
-        await ctx.send("Poll closed. Time's up!")
 
 
 @bot.command()
