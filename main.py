@@ -93,11 +93,13 @@ async def info(ctx):
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
-        await ctx.send("Invalid command used.")
+        return
     elif isinstance(error, commands.MissingRequiredArgument):
         await ctx.send("Missing required arguments.")
     elif isinstance(error, commands.BadArgument):
         await ctx.send("Invalid argument passed.")
+    else:
+        await ctx.send(f"An error occurred: {str(error)}")
 
 
 @bot.command()
