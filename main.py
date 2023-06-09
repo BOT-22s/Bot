@@ -139,28 +139,36 @@ async def on_command_error(ctx, error):
             description="Please provide all the required arguments.",
             color=discord.Color.red()
         )
-        await ctx.send(embed=embed)
+        error_message = await ctx.send(embed=embed)
+        await asyncio.sleep(5)
+        await error_message.delete()
     elif isinstance(error, commands.BadArgument):
         embed = discord.Embed(
             title="Invalid Argument",
             description="Please provide a valid argument.",
             color=discord.Color.red()
         )
-        await ctx.send(embed=embed)
+        error_message = await ctx.send(embed=embed)
+        await asyncio.sleep(5)
+        await error_message.delete()
     elif isinstance(error, discord.HTTPException):
         embed = discord.Embed(
             title="Rate Limit Exceeded",
             description="Oops! We are being rate-limited. Please try again later.",
             color=discord.Color.red()
         )
-        await ctx.send(embed=embed)
+        error_message = await ctx.send(embed=embed)
+        await asyncio.sleep(5)
+        await error_message.delete()
     else:
         embed = discord.Embed(
             title="Error",
             description=f"An error occurred: {str(error)}",
             color=discord.Color.red()
         )
-        await ctx.send(embed=embed)
+        error_message = await ctx.send(embed=embed)
+        await asyncio.sleep(5)
+        await error_message.delete()
 
 
 @bot.command()
@@ -203,9 +211,11 @@ async def poll(ctx, *, question):
         color=discord.Color.blue()
     )
     embed.set_footer(text=f"Poll created by: {ctx.author.display_name}")
-    message = await ctx.send(embed=embed)
-    await message.add_reaction('👍')
-    await message.add_reaction('👎')
+    poll_message = await ctx.send(embed=embed)
+    await poll_message.add_reaction('👍')
+    await poll_message.add_reaction('👎')
+
+    await ctx.message.delete()  # Delete the command message
 
 
 @bot.command()
