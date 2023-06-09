@@ -213,6 +213,7 @@ async def poll(ctx, *, question):
     embed.set_footer(text=f"Poll created by: {ctx.author.display_name}")
     poll_message = await ctx.send(embed=embed)
     await poll_message.add_reaction('👍')
+    await asyncio.sleep(0.5)  # Add a delay between reactions
     await poll_message.add_reaction('👎')
 
     await ctx.message.delete()  # Delete the command message
