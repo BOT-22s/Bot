@@ -191,7 +191,7 @@ async def on_message(message):
 @bot.command()
 async def poll(ctx, *, question):
     embed = discord.Embed(
-        title="New Poll",
+        title="📊 New Poll",
         description=question,
         color=discord.Color.blue()
     )
@@ -199,6 +199,58 @@ async def poll(ctx, *, question):
     message = await ctx.send(embed=embed)
     await message.add_reaction('👍')
     await message.add_reaction('👎')
+
+    def check(reaction, user):
+        return user == ctx.author and reaction.message.id == message.id
+
+    try:
+        reaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=check)
+        if str(reaction.emoji) == '👍':
+            await ctx.send("You voted thumbs up! 👍")
+        elif str(reaction.emoji) == '👎':
+            await ctx.send("You voted thumbs down! 👎")
+        else:
+            await ctx.send("Invalid reaction.")
+    except asyncio.TimeoutError:
+        await ctx.send("Poll closed. Time's up!")
+
+
+@bot.command()
+async def embed(ctx, title, description, color="blue"):
+    try:
+        color = getattr(discord.Color, color.lower())()
+    except AttributeError:
+        color = discord.Color.blue()
+
+    embed = discord.Embed(
+        title=title,
+        description=description,
+        color=color
+    )
+    await ctx.send(embed=embed)
+
+
+@bot.command()
+async def servericon(ctx):
+    embed = discord.Embed(
+        title="Server Icon",
+        description="Here is the server icon:",
+        color=discord.Color.blue()
+    )
+    embed.set_image(url=ctx.guild.icon.url)
+    await ctx.send(embed=embed)
+
+
+@bot.command()
+async def avatar(ctx, member: discord.Member = None):
+    member = member or ctx.author
+    embed = discord.Embed(
+        title="Avatar",
+        description=f"Here is the avatar of {member.name}:",
+        color=discord.Color.blue()
+    )
+    embed.set_image(url=member.avatar.url)
+    await ctx.send(embed=embed)
 
 
 bot.run(os.environ["DISCORD_TOKEN"])
