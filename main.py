@@ -15,7 +15,9 @@ async def on_ready():
 
 @bot.event
 async def on_member_join(member):
-    await member.guild.system_channel.send(f'Welcome {member.mention} to our server!')
+    welcome_channel = member.guild.system_channel
+    if welcome_channel is not None:
+        await welcome_channel.send(f'Welcome {member.mention} to our server!')
 
 
 @bot.command()
@@ -24,6 +26,8 @@ async def ban(ctx, member: discord.Member, *, reason=None):
     try:
         await member.ban(reason=reason)
         await ctx.send(f'Banned {member.mention}')
+    except discord.Forbidden:
+        await ctx.send("I don't have permission to ban members.")
     except Exception as e:
         await ctx.send(str(e))
 
@@ -34,18 +38,33 @@ async def kick(ctx, member: discord.Member, *, reason=None):
     try:
         await member.kick(reason=reason)
         await ctx.send(f'Kicked {member.mention}')
+    except discord.Forbidden:
+        await ctx.send("I don't have permission to kick members.")
+    except Exception as e:
+        await ctx.send(str(e))
+
+
+@bot.command()
+@commands.has_permissions(manage_messages=True)
+async def clear(ctx, amount: int):
+    try:
+        await ctx.channel.purge(limit=amount + 1)
+        await ctx.send(f'Cleared {amount} messages.', delete_after=5)
+    except discord.Forbidden:
+        await ctx.send("I don't have permission to manage messages.")
     except Exception as e:
         await ctx.send(str(e))
 
 
 @bot.command()
 async def testban(ctx):
-    await ctx.send("To ban a user, type: `!ban @username [reason]`. Replace `@username` with the user's username and `[reason]` with the reason for the ban.")
+    await ctx.send("To ban a user, type: `.ban @username [reason]`. Replace `@username` with the user's username and `[reason]` with the reason for the ban.")
 
 
 @bot.command()
 async def ping(ctx):
-    await ctx.send('pong')
+    latency = bot.latency * 1000
+    await ctx.send(f'Pong! Latency: {latency:.2f} ms')
 
 
 @bot.command()
@@ -75,43 +94,38 @@ async def info(ctx):
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send("Invalid command used.")
+    elif isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send("Missing required arguments.")
+    elif isinstance(error, commands.BadArgument):
+        await ctx.send("Invalid argument passed.")
 
 
 @bot.command()
 async def userinfo(ctx, member: discord.Member = None):
-    try:
-        if not member:  # if member is not mentioned
-            member = ctx.message.author  # set member as the author
-        embed = discord.Embed(
-            title=f"{member}",
-            description=f"Here is the info we retrieved about the user {member.mention}",
-            color=discord.Color.dark_blue()
-        )
-        embed.add_field(name="ID", value=f"{member.id}", inline=True)
-        embed.add_field(name="Nickname", value=f"{member.nick}", inline=True)
-        embed.add_field(
-            name="Created at",
-            value=f"{member.created_at.strftime('%a, %#d %B %Y, %I:%M %p UTC')}",
-            inline=False
-        )
-        embed.add_field(
-            name="Joined at",
-            value=f"{member.joined_at.strftime('%a, %#d %B %Y, %I:%M %p UTC')}",
-            inline=False
-        )
-        embed.set_thumbnail(url=f"{member.display_avatar.url}")
-        await ctx.send(embed=embed)
-    except Exception as e:
-        await ctx.send(str(e))
+    if member is None:
+        member = ctx.author
+    embed = discord.Embed(
+        title=f"{member}",
+        description=f"Here is the info we retrieved about the user {member.mention}",
+        color=discord.Color.dark_blue()
+    )
+    embed.set_thumbnail(url=member.avatar.url)
+    embed.add_field(name="ID", value=member.id, inline=True)
+    embed.add_field(name="Nickname", value=member.nick, inline=True)
+    embed.add_field(name="Created at", value=member.created_at.strftime('%a, %#d %B %Y, %I:%M %p UTC'), inline=False)
+    embed.add_field(name="Joined at", value=member.joined_at.strftime('%a, %#d %B %Y, %I:%M %p UTC'), inline=False)
+    await ctx.send(embed=embed)
 
 
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
         return
-    if message.content == 'hello bot':
+
+    if message.content.lower() == 'hello bot':
         response = "Hi there!"
         await message.channel.send(response)
+
     await bot.process_commands(message)
 
 
@@ -126,6 +140,41 @@ async def poll(ctx, *, question):
     message = await ctx.send(embed=embed)
     await message.add_reaction('👍')
     await message.add_reaction('👎')
+
+
+@bot.command()
+async def greet(ctx, member: discord.Member):
+    await ctx.send(f"Hello {member.mention}!")
+
+
+@bot.command()
+async def serverinfo(ctx):
+    guild = ctx.guild
+    roles = ", ".join([role.name for role in guild.roles if role.name != "@everyone"])
+    emojis = ", ".join([str(emoji) for emoji in guild.emojis])
+    online_members = len([member for member in guild.members if member.status != discord.Status.offline])
+
+    embed = discord.Embed(title="Server Information", color=discord.Color.green())
+    embed.set_thumbnail(url=guild.icon.url)
+    embed.add_field(name="Server Name", value=guild.name, inline=False)
+    embed.add_field(name="Server ID", value=guild.id, inline=False)
+    embed.add_field(name="Owner", value=guild.owner, inline=False)
+    embed.add_field(name="Region", value=guild.region, inline=False)
+    embed.add_field(name="Created at", value=guild.created_at.strftime('%a, %#d %B %Y, %I:%M %p UTC'), inline=False)
+    embed.add_field(name="Member Count", value=guild.member_count, inline=False)
+    embed.add_field(name="Online Members", value=online_members, inline=False)
+    embed.add_field(name="Roles", value=roles, inline=False)
+    embed.add_field(name="Emojis", value=emojis, inline=False)
+    await ctx.send(embed=embed)
+
+
+@bot.command()
+async def avatar(ctx, member: discord.Member = None):
+    if member is None:
+        member = ctx.author
+    embed = discord.Embed(title="Avatar", color=discord.Color.blue())
+    embed.set_image(url=member.avatar.url)
+    await ctx.send(embed=embed)
 
 
 bot.run(os.environ["DISCORD_TOKEN"])
