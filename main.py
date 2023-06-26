@@ -2,6 +2,8 @@ import os
 import discord
 import datetime
 import asyncio
+import aiohttp
+import random
 from discord.ext import commands
 
 intents = discord.Intents.all()
