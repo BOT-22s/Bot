@@ -3,11 +3,9 @@ import random
 import aiohttp
 import discord
 from discord.ext import commands
-from discord_slash import SlashCommand
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='.', intents=intents)
-slash = SlashCommand(bot, sync_commands=True)
 
 async def get_meme():
     async with aiohttp.ClientSession() as cs:
@@ -308,11 +306,6 @@ async def joke(ctx):
         "Why can't you give Elsa a balloon? Because she will let it go.",
     ]
     await ctx.send(random.choice(jokes))
-
-@slash.slash(name="TestSlash")
-async def _test(ctx):  # Defines a new "context" (ctx) command called "test."
-    await ctx.respond()
-    await ctx.send(content=f"Hello, {ctx.author.name}!")
     
 
 bot.run(os.environ["DISCORD_TOKEN"])
