@@ -1,24 +1,25 @@
 import os
+import discord
+import datetime
 import asyncio
-import nextcord
-from nextcord.ext import commands
+from discord.ext import commands
 
-intents = nextcord.Intents.all()
+intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='.', intents=intents)
 
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity=nextcord.Game(name="!help for commands"))
+    await bot.change_presence(activity=discord.Game(name="!help for commands"))
     print(f"Logged in as {bot.user}")
 
 @bot.event
 async def on_member_join(member):
     welcome_channel = member.guild.system_channel
     if welcome_channel is not None:
-        embed = nextcord.Embed(
+        embed = discord.Embed(
             title=f"Welcome {member.name}!",
             description=f"Thanks for joining our server, {member.mention}!",
-            color=nextcord.Color.green()
+            color=discord.Color.green()
         )
         embed.set_thumbnail(url=member.avatar.url)
         embed.set_footer(text=f"Joined at {member.joined_at.strftime('%a, %d %B %Y, %I:%M %p UTC')}")
