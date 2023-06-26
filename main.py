@@ -2,13 +2,10 @@ import os
 import random
 import aiohttp
 import discord
-import datetime
 from discord.ext import commands
-from discord_slash import SlashCommand, SlashContext
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='.', intents=intents)
-slash = SlashCommand(bot, sync_commands=True)
 
 async def get_meme():
     async with aiohttp.ClientSession() as cs:
@@ -16,10 +13,12 @@ async def get_meme():
             res = await r.json()
             return res['data']['children'][random.randint(0, 25)]['data']['url']
 
+
 @bot.event
 async def on_ready():
     await bot.change_presence(activity=discord.Game(name=".help for commands"))
     print(f"Logged in as {bot.user}")
+
 
 @bot.event
 async def on_member_join(member):
@@ -33,6 +32,7 @@ async def on_member_join(member):
         embed.set_thumbnail(url=member.avatar.url)
         embed.set_footer(text=f"Joined at {member.joined_at.strftime('%a, %d %B %Y, %I:%M %p UTC')}")
         await welcome_channel.send(embed=embed)
+
 
 @bot.command()
 @commands.has_permissions(ban_members=True)
@@ -52,6 +52,7 @@ async def ban(ctx, member: discord.Member, *, reason=None):
     except Exception as e:
         await ctx.send(str(e))
 
+
 @bot.command()
 @commands.has_permissions(kick_members=True)
 async def kick(ctx, member: discord.Member, *, reason=None):
@@ -69,6 +70,7 @@ async def kick(ctx, member: discord.Member, *, reason=None):
         await ctx.send("I don't have permission to kick members.")
     except Exception as e:
         await ctx.send(str(e))
+
 
 @bot.command()
 @commands.has_permissions(manage_messages=True)
