@@ -1,13 +1,20 @@
 import os
+import random
+import aiohttp
 import discord
 import datetime
-import asyncio
-import aiohttp
-import random
 from discord.ext import commands
+from discord_slash import SlashCommand, SlashContext
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='.', intents=intents)
+slash = SlashCommand(bot, sync_commands=True)
+
+async def get_meme():
+    async with aiohttp.ClientSession() as cs:
+        async with cs.get('https://www.reddit.com/r/memes/new.json?sort=hot') as r:
+            res = await r.json()
+            return res['data']['children'][random.randint(0, 25)]['data']['url']
 
 @bot.event
 async def on_ready():
@@ -68,13 +75,13 @@ async def kick(ctx, member: discord.Member, *, reason=None):
 async def clear(ctx, amount: int):
     try:
         await ctx.channel.purge(limit=amount + 1)
-        embed = nextcord.Embed(
+        embed = discord.Embed(
             title="Messages Cleared",
             description=f"{amount} messages have been cleared in this channel.",
-            color=nextcord.Color.blue()
+            color=discord.Color.blue()
         )
         await ctx.send(embed=embed, delete_after=5)
-    except nextcord.Forbidden:
+    except discord.Forbidden:
         await ctx.send("I don't have permission to manage messages.")
     except Exception as e:
         await ctx.send(str(e))
@@ -269,26 +276,33 @@ async def play(ctx, *, search):
 
 @bot.command()
 async def meme(ctx):
-    async with aiohttp.ClientSession() as cs:
-        async with cs.get('https://www.reddit.com/r/memes/new.json?sort=hot') as r:
-            res = await r.json()
-            embed = discord.Embed(
-                title=res['data']['children'][random.randint(0, 25)]['data']['title'],
-                color=discord.Color.blue()
-            )
-            embed.set_image(url=res['data']['children'][random.randint(0, 25)]['data']['url'])
-            await ctx.send(embed=embed)
+    meme_url = await get_meme()
+    embed = discord.Embed(
+        title="Meme",
+        color=discord.Color.blurple()
+    )
+    embed.set_image(url=meme_url)
+    await ctx.send(embed=embed)
+
 
 @bot.command()
-async def weather(ctx, *, city: str):
-    weather = requests.get(f'http://api.openweathermap.org/data/2.5/weather?q={city}&appid={your_api_key}')
-    data = weather.json()
-    embed = discord.Embed(
-        title=f"Weather in {city}",
-        description=f"The temperature is {data['main']['temp']}°C, "
-                    f"the weather condition is {data['weather'][0]['description']}.",
-        color=discord.Color.blue()
-    )
-    await ctx.send(embed=embed)
+async def roll(ctx, number: int):
+    rolled_number = random.randint(1, number)
+    await ctx.send(f"You rolled a {rolled_number}.")
+
+
+@bot.command()
+async def echo(ctx, *, content: str):
+    await ctx.send(content)
+
+
+@bot.command()
+async def joke(ctx):
+    jokes = [
+        "Why don't scientists trust atoms? Because they make up everything!",
+        "Why did the chicken go to the seance? To talk to the other side.",
+        "Why can't you give Elsa a balloon? Because she will let it go.",
+    ]
+    await ctx.send(random.choice(jokes))
 
 bot.run(os.environ["DISCORD_TOKEN"])
