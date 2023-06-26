@@ -30,33 +30,33 @@ async def on_member_join(member):
 async def ban(ctx, member: discord.Member, *, reason=None):
     try:
         await member.ban(reason=reason)
-        embed = nextcord.Embed(
+        embed = discord.Embed(
             title="Member Banned",
             description=f"{member.name} has been banned from the server.",
-            color=nextcord.Color.red()
+            color=discord.Color.red()
         )
         embed.set_thumbnail(url=member.avatar.url)
         embed.add_field(name="Reason", value=reason or "No reason provided.")
         await ctx.send(embed=embed)
-    except nextcord.Forbidden:
+    except discord.Forbidden:
         await ctx.send("I don't have permission to ban members.")
     except Exception as e:
         await ctx.send(str(e))
 
 @bot.command()
 @commands.has_permissions(kick_members=True)
-async def kick(ctx, member: nextcord.Member, *, reason=None):
+async def kick(ctx, member: discord.Member, *, reason=None):
     try:
         await member.kick(reason=reason)
-        embed = nextcord.Embed(
+        embed = discord.Embed(
             title="Member Kicked",
             description=f"{member.name} has been kicked from the server.",
-            color=nextcord.Color.orange()
+            color=discord.Color.orange()
         )
         embed.set_thumbnail(url=member.avatar.url)
         embed.add_field(name="Reason", value=reason or "No reason provided.")
         await ctx.send(embed=embed)
-    except nextcord.Forbidden:
+    except discord.Forbidden:
         await ctx.send("I don't have permission to kick members.")
     except Exception as e:
         await ctx.send(str(e))
