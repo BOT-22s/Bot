@@ -27,7 +27,7 @@ async def on_member_join(member):
 
 @bot.command()
 @commands.has_permissions(ban_members=True)
-async def ban(ctx, member: nextcord.Member, *, reason=None):
+async def ban(ctx, member: discord.Member, *, reason=None):
     try:
         await member.ban(reason=reason)
         embed = nextcord.Embed(
