@@ -18,7 +18,7 @@ async def get_meme():
 
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity=discord.Game(name=".help for commands"))
+    await bot.change_presence(activity=discord.Game(name=".help for command"))
     print(f"Logged in as {bot.user}")
 
 
