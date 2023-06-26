@@ -1,87 +1,80 @@
 import os
-import discord
-import datetime
 import asyncio
-from discord.ext import commands
+import nextcord
+from nextcord.ext import commands
 
-intents = discord.Intents.all()
+intents = nextcord.Intents.all()
 bot = commands.Bot(command_prefix='.', intents=intents)
-
 
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity=discord.Game(name="!help for commands"))
+    await bot.change_presence(activity=nextcord.Game(name="!help for commands"))
     print(f"Logged in as {bot.user}")
-
 
 @bot.event
 async def on_member_join(member):
     welcome_channel = member.guild.system_channel
     if welcome_channel is not None:
-        embed = discord.Embed(
+        embed = nextcord.Embed(
             title=f"Welcome {member.name}!",
             description=f"Thanks for joining our server, {member.mention}!",
-            color=discord.Color.green()
+            color=nextcord.Color.green()
         )
         embed.set_thumbnail(url=member.avatar.url)
         embed.set_footer(text=f"Joined at {member.joined_at.strftime('%a, %d %B %Y, %I:%M %p UTC')}")
         await welcome_channel.send(embed=embed)
 
-
 @bot.command()
 @commands.has_permissions(ban_members=True)
-async def ban(ctx, member: discord.Member, *, reason=None):
+async def ban(ctx, member: nextcord.Member, *, reason=None):
     try:
         await member.ban(reason=reason)
-        embed = discord.Embed(
+        embed = nextcord.Embed(
             title="Member Banned",
             description=f"{member.name} has been banned from the server.",
-            color=discord.Color.red()
+            color=nextcord.Color.red()
         )
         embed.set_thumbnail(url=member.avatar.url)
         embed.add_field(name="Reason", value=reason or "No reason provided.")
         await ctx.send(embed=embed)
-    except discord.Forbidden:
+    except nextcord.Forbidden:
         await ctx.send("I don't have permission to ban members.")
     except Exception as e:
         await ctx.send(str(e))
 
-
 @bot.command()
 @commands.has_permissions(kick_members=True)
-async def kick(ctx, member: discord.Member, *, reason=None):
+async def kick(ctx, member: nextcord.Member, *, reason=None):
     try:
         await member.kick(reason=reason)
-        embed = discord.Embed(
+        embed = nextcord.Embed(
             title="Member Kicked",
             description=f"{member.name} has been kicked from the server.",
-            color=discord.Color.orange()
+            color=nextcord.Color.orange()
         )
         embed.set_thumbnail(url=member.avatar.url)
         embed.add_field(name="Reason", value=reason or "No reason provided.")
         await ctx.send(embed=embed)
-    except discord.Forbidden:
+    except nextcord.Forbidden:
         await ctx.send("I don't have permission to kick members.")
     except Exception as e:
         await ctx.send(str(e))
-
 
 @bot.command()
 @commands.has_permissions(manage_messages=True)
 async def clear(ctx, amount: int):
     try:
         await ctx.channel.purge(limit=amount + 1)
-        embed = discord.Embed(
+        embed = nextcord.Embed(
             title="Messages Cleared",
             description=f"{amount} messages have been cleared in this channel.",
-            color=discord.Color.blue()
+            color=nextcord.Color.blue()
         )
         await ctx.send(embed=embed, delete_after=5)
-    except discord.Forbidden:
+    except nextcord.Forbidden:
         await ctx.send("I don't have permission to manage messages.")
     except Exception as e:
         await ctx.send(str(e))
-
 
 @bot.command()
 async def testban(ctx):
@@ -256,6 +249,11 @@ async def avatar(ctx, member: discord.Member = None):
     )
     embed.set_image(url=member.avatar.url)
     await ctx.send(embed=embed)
+
+@bot.command()
+async def invite(ctx):
+    link = await ctx.channel.create_invite(max_age = 300)
+    await ctx.send(f"Here is an instant invite to our server: {link}")
 
 
 bot.run(os.environ["DISCORD_TOKEN"])
