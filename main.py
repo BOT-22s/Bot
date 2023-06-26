@@ -313,5 +313,6 @@ async def joke(ctx):
 async def _test(ctx):  # Defines a new "context" (ctx) command called "test."
     await ctx.respond()
     await ctx.send(content=f"Hello, {ctx.author.name}!")
+    
 
 bot.run(os.environ["DISCORD_TOKEN"])
