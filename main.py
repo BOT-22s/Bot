@@ -256,5 +256,37 @@ async def invite(ctx):
     link = await ctx.channel.create_invite(max_age = 300)
     await ctx.send(f"Here is an instant invite to our server: {link}")
 
+@bot.command()
+async def say(ctx, *, message):
+    await ctx.send(message)
+
+@bot.command()
+async def play(ctx, *, search):
+    source = await YTDLSource.create_source(ctx, search, loop=bot.loop)
+    ctx.voice_client.play(source)
+
+@bot.command()
+async def meme(ctx):
+    async with aiohttp.ClientSession() as cs:
+        async with cs.get('https://www.reddit.com/r/memes/new.json?sort=hot') as r:
+            res = await r.json()
+            embed = discord.Embed(
+                title=res['data']['children'][random.randint(0, 25)]['data']['title'],
+                color=discord.Color.blue()
+            )
+            embed.set_image(url=res['data']['children'][random.randint(0, 25)]['data']['url'])
+            await ctx.send(embed=embed)
+
+@bot.command()
+async def weather(ctx, *, city: str):
+    weather = requests.get(f'http://api.openweathermap.org/data/2.5/weather?q={city}&appid={your_api_key}')
+    data = weather.json()
+    embed = discord.Embed(
+        title=f"Weather in {city}",
+        description=f"The temperature is {data['main']['temp']}°C, "
+                    f"the weather condition is {data['weather'][0]['description']}.",
+        color=discord.Color.blue()
+    )
+    await ctx.send(embed=embed)
 
 bot.run(os.environ["DISCORD_TOKEN"])
